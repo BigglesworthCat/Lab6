@@ -108,7 +108,7 @@ class Application(Tk):
 
         # 'Оригінальна матриця'
         self.adjacent_matrix_label_frame = LabelFrame(self, text='Матриця суміжності:')
-        self.adjacent_matrix_label_frame.grid(row=0, column=3, rowspan=2, columnspan=3)
+        self.adjacent_matrix_label_frame.grid(row=0, column=3, columnspan=3)
 
         self.adjacent_matrix = Table(self.adjacent_matrix_label_frame)
         self.adjacent_matrix.show()
@@ -116,11 +116,19 @@ class Application(Tk):
 
         # 'Імпульси'
         self.impulse_matrix_label_frame = LabelFrame(self, text='Ітерації:')
-        self.impulse_matrix_label_frame.grid(row=1, column=3, rowspan=2, columnspan=3)
+        self.impulse_matrix_label_frame.grid(row=1, column=3, columnspan=3)
 
         self.impulse_matrix = Table(self.impulse_matrix_label_frame)
         self.impulse_matrix.show()
         self.impulse_matrix.model.df = TableModel.getSampleData()
+
+        # 'Вектор збурення'
+        self.disturbance_vector_label_frame = LabelFrame(self, text='Вектор збурення:')
+        self.disturbance_vector_label_frame.grid(row=2, column=3, columnspan=3)
+
+        self.disturbance_vector = Table(self.disturbance_vector_label_frame)
+        self.disturbance_vector.show()
+        self.disturbance_vector.model.df = TableModel.getSampleData()
 
     def open_input_matrix(self):
         input_matrix_path = filedialog.askopenfilename(title='Open a File',
