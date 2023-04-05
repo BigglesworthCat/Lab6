@@ -3,13 +3,16 @@ from tkinter import filedialog
 
 import pandas
 from pandastable import Table, TableModel
+import pandas as pd
 
+from cognitive_matrix import Stability
+from impulse_modeling import ImpulseProcess
 
 class Application(Tk):
     def __init__(self):
         super().__init__()
         self.title('Лабораторна робота 4')
-        self.resizable(False, False)
+        # self.resizable(False, False)
 
         # 'Файли'
         self.files_label_frame = LabelFrame(self, text='Файли:')
@@ -119,31 +122,62 @@ class Application(Tk):
         self.impulse_matrix_label_frame.grid(row=1, column=3, columnspan=3)
 
         self.impulse_matrix = Table(self.impulse_matrix_label_frame)
+        
+        self.impulse_matrix.updateModel(TableModel(pd.DataFrame([[1]*8]*8)))
         self.impulse_matrix.show()
-        self.impulse_matrix.model.df = TableModel.getSampleData()
 
         # 'Вектор збурення'
         self.disturbance_vector_label_frame = LabelFrame(self, text='Вектор збурення:')
         self.disturbance_vector_label_frame.grid(row=2, column=3, columnspan=3)
 
+
+        disturbance_vector = pd.DataFrame([[0]]*8)
         self.disturbance_vector = Table(self.disturbance_vector_label_frame)
+        self.disturbance_vector.updateModel(TableModel(disturbance_vector))
+        
         self.disturbance_vector.show()
-        self.disturbance_vector.model.df = TableModel.getSampleData()
 
     def open_input_matrix(self):
         input_matrix_path = filedialog.askopenfilename(title='Open a File',
                                                   filetypes=(("Excel files", ".*xlsx"), ("All Files", "*.")))
         self.input_matrix_path_var.set(input_matrix_path)
-        self.adjacent_matrix.updateModel(TableModel(pandas.read_excel(input_matrix_path)))
+        self.input_df = pandas.read_excel(input_matrix_path)
+        self.input_df = self.input_df.drop(columns=['Unnamed: 0'])
+        self.adjacent_matrix.updateModel(TableModel(self.input_df))
         self.adjacent_matrix.redraw()
-
+        
+        self.disturbance_vector_df = pd.DataFrame([[0]]*self.input_df.shape[1])
+        self.disturbance_vector.updateModel(TableModel(self.disturbance_vector_df))
+        self.disturbance_vector.redraw()
+        
     def check_sustainability(self):
         pass
 
     def model_impulse(self):
-        pass
+        self.value_impulse_modeling()
 
+    def value_impulse_modeling(self):
+        """Створити моделювання у табличному вигляді."""
+        import numpy as np
+        n_steps = int(self.iterations_var.get())
+        q_impulses = pd.DataFrame(data=np.zeros((self.input_df.shape[0], n_steps+1)), index=self.input_df.index,
+                                columns=list(range(n_steps + 1)))
+        
+        # q_impulses.iloc[:, 0] = self.disturbance_vector_df.iloc[:, 0]
+        print(q_impulses.shape,self.input_df.shape)
+        ip = ImpulseProcess(self.input_df, q_impulses.iloc[:, 0])
+        ip.impulse_modeling(q_impulses, n_steps)
 
+        x = ip.x
+        # df_output = pd.DataFrame(np.zeros(len(self.adjacency_matrix.index,self.n_model_steps+1)))
+        # for i in range(len(self.adjacency_matrix.index)):
+        #     for j in range(self.n_model_steps+1):
+        #         # item = QtWidgets.QTableWidgetItem(f'{x.iloc[i, j]:.2f}')
+        #         # self.x_table.setItem(i, j, item)
+        #         df_output.iloc[i,j]
+        self.impulse_matrix.updateModel(TableModel(x))
+        self.impulse_matrix.redraw()
+    
 if __name__ == "__main__":
     application = Application()
     application.mainloop()
