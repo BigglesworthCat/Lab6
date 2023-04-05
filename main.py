@@ -159,6 +159,7 @@ class Application(Tk):
     def value_impulse_modeling(self):
         """Створити моделювання у табличному вигляді."""
         import numpy as np
+        import matplotlib.pyplot as plt
         n_steps = int(self.iterations_var.get())
         q_impulses = pd.DataFrame(data=np.zeros((self.input_df.shape[0], n_steps+1)), index=self.input_df.index,
                                 columns=list(range(n_steps + 1)))
@@ -177,6 +178,8 @@ class Application(Tk):
         #         df_output.iloc[i,j]
         self.impulse_matrix.updateModel(TableModel(x))
         self.impulse_matrix.redraw()
+        x.T.plot()
+        plt.show()
     
 if __name__ == "__main__":
     application = Application()
