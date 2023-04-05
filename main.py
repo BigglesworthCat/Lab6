@@ -151,11 +151,56 @@ class Application(Tk):
         self.disturbance_vector.redraw()
         
     def check_sustainability(self):
-        pass
+        self.check_stability()
 
     def model_impulse(self):
         self.value_impulse_modeling()
+        
+    def check_stability(self):
+        """Перевіряємо матрицю на стійкість та виводимо результати у інтерфейс."""
+        input_df = self.input_df.copy()
+        for i,col_name in enumerate(self.input_df.columns):
+            input_df.rename({col_name:i},axis='columns',inplace=True)            
+        self.stability = Stability(input_df)
 
+        def bull_converter(bull_term):
+            return 'так!' if bull_term else 'ні!'
+        if self.stability.structure_stability:
+            self.values_sustainability_checkbutton.select()
+        else:
+            self.values_sustainability_checkbutton.deselect()
+
+        if self.stability.value_stability:
+            self.structure_sustainability_checkbutton.select()
+        else:
+            self.structure_sustainability_checkbutton.deselect()
+
+        if self.stability.value_stability:
+            self.disturbance_sustainability_checkbutton.select()
+        else:
+            self.disturbance_sustainability_checkbutton.deselect()
+
+        # self.eigenvalues_listbox.clear
+        for ev in self.stability.eigenvalues:
+            self.eigenvalues_listbox.insert(END,'{0:.2f} {1} {2:.2f}i'.format(ev.real, '+-'[int(ev.imag < 0)], abs(ev.imag)))
+        # self.max_eigenvalues_entry.clear
+        self.max_eigenvalues_entry.insert(END,f'{self.stability.spectral_radius:.2f}')
+        self.cycles_number_entry.insert(END,str(len(self.stability.graph.pair_cycles)))
+
+        self.cycles_listbox.clear()
+        
+        rofl_list = []
+        for pc in self.stability.graph.pair_cycles:
+            pc.append(pc[0])
+            pc = '~>'.join(f'e{e}' for e in pc)
+            rofl_list.append(pc)
+
+        rofl_list = sorted(rofl_list, key=len)
+        for pc in rofl_list:
+            self.cycles_listbox.insert(END,pc)
+            
+        # self.print_eigenvalues()
+        # self.print_pair_cycles()
     def value_impulse_modeling(self):
         """Створити моделювання у табличному вигляді."""
         import numpy as np
