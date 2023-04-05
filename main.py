@@ -163,7 +163,7 @@ class Application(Tk):
         q_impulses = pd.DataFrame(data=np.zeros((self.input_df.shape[0], n_steps+1)), index=self.input_df.index,
                                 columns=list(range(n_steps + 1)))
         
-        # q_impulses.iloc[:, 0] = self.disturbance_vector_df.iloc[:, 0]
+        q_impulses.iloc[:, 0] = self.disturbance_vector_df.iloc[:, 0]
         print(q_impulses.shape,self.input_df.shape)
         ip = ImpulseProcess(self.input_df, q_impulses.iloc[:, 0])
         ip.impulse_modeling(q_impulses, n_steps)

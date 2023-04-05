@@ -48,7 +48,7 @@ class ImpulseProcess:
 
     def __add_x(self):
         """Додати значення x на self.t-ому кроці."""
-        self.x[self.t] = self.x[self.t-1] + self.adjacency_matrix @ self.p[self.t-1] + self.q[self.t-1]
+        self.x[self.t] = self.x[self.t-1] + np.dot(self.adjacency_matrix, self.p[self.t-1]) + self.q[self.t-1]
         return self.x[self.t]  # OPTIONAL
 
     def send_impulse(self, q):
