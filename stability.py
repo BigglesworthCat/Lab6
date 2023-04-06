@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import linalg
-from cognitive_graph import Graph
+from graphs import Graph
 
 
 class Stability:

@@ -7,8 +7,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from cognitive_matrix import Stability
-from impulse_modeling import ImpulseProcess
+from stability import Stability
+from impulse import ImpulseProcess
 
 
 class Application(Tk):
@@ -148,9 +148,10 @@ class Application(Tk):
 
     def open_input_matrix(self):
         input_matrix_path = filedialog.askopenfilename(title='Open a File',
-                                                       filetypes=(("Excel files", ".*xlsx"), ("All Files", "*.")))
+                                                       filetypes=(("Excel files", ".*csv"), ("All Files", "*.")))
         self.input_matrix_path_var.set(input_matrix_path)
-        self.adjacent_matrix = pandas.read_excel(input_matrix_path, index_col=0)
+        self.adjacent_matrix = pandas.read_csv(input_matrix_path, index_col=0, sep=';')
+        self.adjacent_matrix = self.adjacent_matrix.dropna(axis=0)
         self.adjacent_matrix_table.updateModel(TableModel(self.adjacent_matrix))
         self.adjacent_matrix_table.redraw()
 
@@ -160,7 +161,7 @@ class Application(Tk):
 
     def open_output_matrix(self):
         output_matrix_path = filedialog.askopenfilename(title='Open a File',
-                                                        filetypes=(("Excel files", ".*xlsx"), ("All Files", "*.")))
+                                                        filetypes=(("Excel files", ".*csv"), ("All Files", "*.")))
         self.output_matrix_path_var.set(output_matrix_path)
 
     def check_sustainability(self):
@@ -217,8 +218,8 @@ class Application(Tk):
         x.T.plot()
         plt.show()
 
-        x.to_excel(
-            '\\'.join(self.input_matrix_path_var.get().split('\\')[:-1]) + self.output_matrix_path_var.get() + '.xlsx')
+        x.to_csv(
+            '\\'.join(self.input_matrix_path_var.get().split('\\')[:-1]) + self.output_matrix_path_var.get() + '.csv')
 
 
 if __name__ == "__main__":
