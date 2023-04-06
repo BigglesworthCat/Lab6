@@ -32,7 +32,8 @@ class Application(Tk):
 
         self.input_matrix_path_var = StringVar()
         self.input_matrix_path_var.set('')
-        self.input_matrix_path_entry = Entry(self.files_label_frame, textvariable=self.input_matrix_path_var)
+        self.input_matrix_path_entry = Entry(self.files_label_frame, textvariable=self.input_matrix_path_var,
+                                             state=DISABLED, disabledbackground='white', disabledforeground='black')
         self.input_matrix_path_entry.grid(row=0, column=1, sticky='WE', padx=5, pady=2)
 
         self.browse_input_button = Button(self.files_label_frame, text='...', command=self.open_input_matrix)
@@ -42,7 +43,7 @@ class Application(Tk):
         self.output_matrix_label.grid(row=1, column=0, sticky='E', padx=5, pady=2)
 
         self.output_matrix_path_var = StringVar()
-        self.output_matrix_path_var.set('')
+        self.output_matrix_path_var.set('output')
         self.output_matrix_path_entry = Entry(self.files_label_frame, textvariable=self.output_matrix_path_var)
         self.output_matrix_path_entry.grid(row=1, column=1, sticky='WE', padx=5, pady=2)
 
@@ -203,11 +204,11 @@ class Application(Tk):
 
     def model_impulse(self):
         n_steps = int(self.iterations_var.get())
-        q_impulses = pd.DataFrame(data=np.zeros((self.adjacent_matrix.shape[0], n_steps + 1)), index=self.adjacent_matrix.columns,
+        q_impulses = pd.DataFrame(data=np.zeros((self.adjacent_matrix.shape[0], n_steps + 1)),
+                                  index=self.adjacent_matrix.columns,
                                   columns=list(range(n_steps + 1)))
 
-        q_impulses.iloc[:, 0] = self.disturbance_vector.iloc[:, 0].astype(np.float)
-        print(q_impulses.shape, self.adjacent_matrix.shape)
+        q_impulses.iloc[:, 0] = self.disturbance_vector.iloc[:, 0].astype(float)
         ip = ImpulseProcess(self.adjacent_matrix, q_impulses.iloc[:, 0])
         ip.impulse_modeling(q_impulses, n_steps)
         x = ip.x
@@ -215,6 +216,9 @@ class Application(Tk):
         self.impulse_matrix_table.redraw()
         x.T.plot()
         plt.show()
+
+        x.to_excel(
+            '\\'.join(self.input_matrix_path_var.get().split('\\')[:-1]) + self.output_matrix_path_var.get() + '.xlsx')
 
 
 if __name__ == "__main__":
