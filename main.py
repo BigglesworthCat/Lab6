@@ -164,8 +164,6 @@ class Application(Tk):
 
     def check_sustainability(self):
         adjacent_matrix = self.adjacent_matrix.copy()
-        for i, col_name in enumerate(self.adjacent_matrix.columns):
-            adjacent_matrix.rename({col_name: i}, axis='columns', inplace=True)
         self.stability = Stability(adjacent_matrix)
 
         if self.stability.structure_stability:
@@ -189,7 +187,7 @@ class Application(Tk):
         items_list = []
         for pc in self.stability.graph.pair_cycles:
             pc.append(pc[0])
-            pc = '~>'.join(f'{self.adjacent_matrix.columns[e]}' for e in pc)
+            pc = '~>'.join(f'{e}' for e in pc)
             items_list.append(pc)
         items_list = sorted(items_list, key=len)
         for pc in items_list:
