@@ -6,6 +6,7 @@ from pandastable import Table, TableModel
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import networkx as nx
 
 from stability import Stability
 from impulse import ImpulseProcess
@@ -186,10 +187,11 @@ class Application(Tk):
         self.cycles_number_entry.delete(0, END)
         self.cycles_number_entry.insert(END, str(len(self.stability.graph.pair_cycles)))
 
+        self.cycles_listbox.delete(0, END)
         items_list = []
         for pc in self.stability.graph.pair_cycles:
             pc.append(pc[0])
-            pc = '~>'.join(f'{e}' for e in pc)
+            pc = '->'.join(f'{e}' for e in pc)
             items_list.append(pc)
         items_list = sorted(items_list, key=len)
         for pc in items_list:
@@ -202,6 +204,8 @@ class Application(Tk):
         for ev in self.stability.eigenvalues:
             self.eigenvalues_listbox.insert(END, '{0:.2f} {1} {2:.2f}i'.format(ev.real, '+-'[int(ev.imag < 0)],
                                                                                abs(ev.imag)))
+
+        self.plot_graph()
 
     def model_impulse(self):
         n_steps = int(self.iterations_var.get())
@@ -220,6 +224,23 @@ class Application(Tk):
 
         x.to_csv(
             '\\'.join(self.input_matrix_path_var.get().split('\\')[:-1]) + self.output_matrix_path_var.get() + '.csv')
+
+    def plot_graph(self):
+        G = nx.DiGraph(self.adjacent_matrix)
+
+        edge_labels = nx.get_edge_attributes(G, 'weight')
+        edge_labels = {(u, v): str(w) for (u, v), w in edge_labels.items()}
+
+        edge_colors = ["r" if w < 0 else "b" for u, v, w in G.edges.data('weight')]
+
+        fig, ax = plt.subplots(figsize=(10, 8))
+        pos = nx.circular_layout(G)
+        nx.draw_networkx_nodes(G, pos, node_size=800, node_color='lightblue', edgecolors='blue')
+        nx.draw_networkx_labels(G, pos, font_size=10, font_family='sans-serif')
+        nx.draw_networkx_edges(G, pos, width=1.4, arrowsize=20, edge_color=edge_colors)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=7, font_family='sans-serif')
+        plt.axis('off')
+        plt.show()
 
 
 if __name__ == "__main__":
